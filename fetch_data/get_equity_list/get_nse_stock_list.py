@@ -15,13 +15,14 @@ class EquityListToMySQL:
         self.db = mysql.connector.connect(**db_config)
         self.cursor = self.db.cursor()
         self.table =config.table_name
+        self.date_input_format = config.date_input_format
+        self.date_output_format = config.date_output_format
 
 
     
-    def convert_date_format(self, input_date_string, input_format =  "%d-%b-%Y", output_format = "%m-%d-%Y"):
+    def convert_date_format(self, input_date_string ):
 
         """
-
         Convert the date from one format to another.
 
         Parameters:
@@ -31,14 +32,13 @@ class EquityListToMySQL:
 
         Returns:
         A string representing the date in the desired output format.
-
         """
 
         # Convert to datetime object
-        date_object = datetime.strptime(input_date_string, input_format)
+        date_object = datetime.strptime(input_date_string, self.date_input_format)
 
         # Format as output format
-        formatted_date = date_object.strftime(output_format)
+        formatted_date = date_object.strftime(self.date_output_format)
 
         return formatted_date
 
