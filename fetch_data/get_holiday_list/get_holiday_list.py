@@ -3,6 +3,8 @@ from datetime import datetime
 import logging
 import nselib
 import os
+import sys
+sys.path.append('../config')
 import config
 from logging.handlers import TimedRotatingFileHandler
 
@@ -15,7 +17,7 @@ class HolidayListToMySQL:
 
         self.db = mysql.connector.connect(**db_config)
         self.cursor = self.db.cursor()
-        self.table =config.table_name
+        self.table =config.holiday_list_table_name
         self.date_input_format = config.date_input_format
         self.date_output_format = config.date_output_format
 
@@ -111,11 +113,19 @@ if __name__=='__main__':
             os.makedirs('logs')
 
     # Set up logging configuration with TimedRotatingFileHandler
-    log_formatter = logging.Formatter('%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
-    log_handler = TimedRotatingFileHandler(filename='logs/holiday_list_scheduler.log', when='midnight', interval=1, backupCount=7)
-    log_handler.setFormatter(log_formatter)
-    logger = logging.getLogger()
-    logger.addHandler(log_handler)
+    logger = logging.getLogger("my_logger")
+    logger.setLevel(logging.DEBUG)  # Set the logging level
+
+    # Configure the formatter
+    log_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+
+    # Create a TimedRotatingFileHandler
+    file_handler = TimedRotatingFileHandler("logs/holiday_list_scheduler.log", when="midnight", interval=1, backupCount=5)
+    file_handler.setLevel(logging.DEBUG)  # Set the logging level for the handler
+    file_handler.setFormatter(log_formatter)
+
+    # Add the handler to the logger
+    logger.addHandler(file_handler)
     logger.setLevel(logging.INFO)
 
 
@@ -142,11 +152,11 @@ if __name__=='__main__':
         holiday_to_mysql.close_connection()
 
         # Log the job execution
-        logging.info(f"Job executed at {datetime.now()}")
+        logger.info(f"Job executed at {datetime.now()}")
     
 
     except Exception as e:
 
-        logging.error(f"Error because of  : {e}")
+        logger.error(f"Error because of  : {e}",exc_info=True)
 
     
